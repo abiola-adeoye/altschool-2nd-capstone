@@ -5,3 +5,7 @@ venv
 chromedriver.exe
 
 .idea
+
+__pycache__/
+
+geckodriver.log
