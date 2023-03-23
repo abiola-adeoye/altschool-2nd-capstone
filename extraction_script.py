@@ -22,16 +22,23 @@ class MHScrapper:
             self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
 
     def scrape_mh_data(self):
+        header_val = []
+        rows = []
         while True:
             page = self.get_page_table()
             header = self.get_table_headers(page)
+            header_val.append(header)
+
             data = self.get_table_data(page)
+            rows.append(data)
+
             page_bool = self.get_next_page()
             if page_bool is False:
                 break
             if self.test is True:
                 if self.page == 10:
                     break
+        return {"header":header_val, "rows":rows}
 
     def get_page_table(self):
         try:
