@@ -9,3 +9,5 @@ chromedriver.exe
 __pycache__/
 
 geckodriver.log
+
+extraction_script.log
