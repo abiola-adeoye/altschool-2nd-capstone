@@ -27,7 +27,9 @@ class MHScrapper:
         page = self.get_page_table()
         header = self.get_table_headers(page)
 
-        data = self.get_table_data(page)
+        body = self.get_table_body(page)
+        data = self.get_table_data(body)
+
         rows.append(data)
 
         self.get_next_page()
@@ -53,6 +55,98 @@ class MHScrapper:
             self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
         return page_table
 
+    @staticmethod
+    def get_table_headers(page_table):
+        table_headers_text = page_table.find_element(By.TAG_NAME, "thead").text
+        table_headers_split = table_headers_text.split()
+        return table_headers_split
+
+    @staticmethod
+    def get_table_body(page_table):
+        return page_table.find_element(By.TAG_NAME, "tbody")  # find body tag
+
+    def get_table_data(self, table_body):
+        table_data_text = table_body.text  # find elements and return the text
+        table_data_rows = table_data_text.split("\n")  # split the text data by newline command
+
+        table_data_values = [row.split() for row in table_data_rows]
+        return table_data_values
+
+    @staticmethod
+    def get_page_view_buttons(self, table_body):
+        buttons = table_body.find_elements(By.LINK_TEXT, "View")
+        return buttons
+
+    def click_extract_view_buttons_data(self, buttons):
+        views_data = []
+        for button in buttons:
+            button.click()
+            view_panel = self.driver.find_element(By.CLASS_NAME, "panel-group")
+            view_headers = self.get_drop_down_headers(view_panel)
+            button_data = self.extract_view_drop_down_data(view_headers, view_panel)
+
+            views_data.append(button_data)
+
+    @staticmethod
+    def get_drop_down_headers(view_panel):
+        drop_down_heading = view_panel.find_elements(By.CLASS_NAME, "panel-heading")    # find all heading objs
+
+        drop_down_heading_text = [heading.text for heading in drop_down_heading]  # extract the heading text
+        return drop_down_heading_text
+
+    def extract_view_drop_down_data(self, drop_down_headers, view_panel):
+        views_data = {}
+        count = 1
+
+        clickable_headers = [view_panel.find_element(By.LINK_TEXT, header) for header in drop_down_headers]
+        for clickable_header in clickable_headers:
+            clickable_header.click()
+            clickable_header_text = clickable_header.text.lower()
+            if clickable_header_text == "identifiers":
+                data = self.get_identifiers()
+            elif clickable_header_text == "location":
+                data = self.get_location()
+            elif clickable_header_text == "contacts":
+                data = self.get_contacts()
+            elif clickable_header_text == "status":
+                data = self.get_status()
+            elif clickable_header.text == "services":
+                data = self.get_services()
+            elif clickable_header.text == "personnel":
+                data = self.get_personnel()
+
+            views_data[clickable_header_text] = data
+
+        return views_data
+
+    @staticmethod
+    def get_identifiers(view_panel):
+        pass
+
+    @staticmethod
+    def get_location(view_panel):
+        pass
+
+    @staticmethod
+    def get_contacts(view_panel):
+        pass
+
+    @staticmethod
+    def get_status(view_panel):
+        pass
+
+    @staticmethod
+    def get_services(view_panel):
+        pass
+
+    @staticmethod
+    def get_personnel(view_panel):
+        pass
+
+    @staticmethod
+    def close_view_panel(view_panel):
+        view_panel.send_keys(Keys.ESCAPE)
+
     def get_next_page(self):
         pagination = self.driver.find_element(By.CLASS_NAME, "pagination")
         try:
@@ -62,19 +156,3 @@ class MHScrapper:
         except NoSuchElementException:
             self.logger.info("End of Health Ministry data pages")
             return False
-
-    @staticmethod
-    def get_table_headers(page_table):
-        table_headers_text = page_table.find_element(By.TAG_NAME, "thead").text
-        table_headers_split = table_headers_text.split()
-        return table_headers_split
-
-    @staticmethod
-    def get_table_data(page_table):
-        table_data_text = page_table.find_element(By.TAG_NAME, "tbody").text    #find elements and return the text
-        table_data_rows = table_data_text.split("\n")   #split the text data by newline command
-
-        table_data_values = [ row.split() for row in table_data_rows ]
-        return table_data_values
-
-
