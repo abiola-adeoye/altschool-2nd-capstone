@@ -1,9 +1,12 @@
+from typing import List, Dict
+
 from log import load_logging
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class MHScrapper:
@@ -14,58 +17,63 @@ class MHScrapper:
         self.test = test
 
         try:
-            self.logger.info(f"Minitry of Health data scrapping has started...")
+            self.logger.info(f"Ministry of Health data scrapping has started...")
             self.driver = webdriver.Chrome()
             self.driver.get(health_data_website)
-            self.driver.implicitly_wait(5)
+            self.driver.implicitly_wait(3)
         except Exception:
             self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
 
     def scrape_mh_data(self):
         rows = []
 
-        page = self.get_page_table()
-        header = self.get_table_headers(page)
-
-        body = self.get_table_body(page)
-        data = self.get_table_data(body)
-
-        rows.append(data)
-
-        self.get_next_page()
         while True:
-            page = self.get_page_table()
+            page_table = self.get_page_table()
+            if self.page <= 1:
+                header = self.get_table_headers(page_table)     #extract headers once as they don't change
 
-            data = self.get_table_data(page)
+            # extracts all row data of current page
+            page_body = self.get_table_body(page_table)
+            data = self.get_table_data(page_body)
             rows.append(data)
 
+            # click each view button one by one and extract data then close
+            view_buttons = self.get_page_view_buttons(page_body)
+            view_button_data = self.click_extract_view_buttons_data(view_buttons)
+
+
+            # move to next page and check if we're at final page
             page_bool = self.get_next_page()
             if page_bool is False:
                 break
-            if self.test is True:
+            if self.test is True:   # for testing purposes only scrapes 10 pages worth of data
                 if self.page == 10:
                     break
         return {"header":header, "rows":rows}
 
-    def get_page_table(self):
+    def get_page_table(self) -> WebElement | None:
         try:
             page_table = self.driver.find_element(By.ID, "hosp")
             self.logger.info(f"getting table tag element for page {self.page}")
+            return page_table
         except Exception:
-            self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
-        return page_table
+            self.logger.error(f"An error occurred getting table tag element for page {self.page}", exc_info=True)
+            return None
+
 
     @staticmethod
-    def get_table_headers(page_table):
+    def get_table_headers(page_table: WebElement) -> List[str]:
         table_headers_text = page_table.find_element(By.TAG_NAME, "thead").text
         table_headers_split = table_headers_text.split()
         return table_headers_split
 
     @staticmethod
-    def get_table_body(page_table):
-        return page_table.find_element(By.TAG_NAME, "tbody")  # find body tag
+    def get_table_body(page_table: WebElement) -> WebElement:
+        body = page_table.find_element(By.TAG_NAME, "tbody")  # find body tag
+        return body
 
-    def get_table_data(self, table_body):
+    @staticmethod
+    def get_table_data(table_body: WebElement) -> List[List[str]]:
         table_data_text = table_body.text  # find elements and return the text
         table_data_rows = table_data_text.split("\n")  # split the text data by newline command
 
@@ -73,30 +81,32 @@ class MHScrapper:
         return table_data_values
 
     @staticmethod
-    def get_page_view_buttons(self, table_body):
+    def get_page_view_buttons(table_body: WebElement) -> WebElement:
         buttons = table_body.find_elements(By.LINK_TEXT, "View")
         return buttons
 
-    def click_extract_view_buttons_data(self, buttons):
-        views_data = []
+    def click_extract_view_buttons_data(self, buttons: WebElement) -> list[dict]:
+        page_view_buttons_data = []
         for button in buttons:
             button.click()
             view_panel = self.driver.find_element(By.CLASS_NAME, "panel-group")
             view_headers = self.get_drop_down_headers(view_panel)
-            button_data = self.extract_view_drop_down_data(view_headers, view_panel)
+            view_data = self.extract_view_drop_down_data(view_headers, view_panel)
 
-            views_data.append(button_data)
+            self.close_view_panel()
+
+            page_view_buttons_data.append(view_data)
+        return page_view_buttons_data
 
     @staticmethod
-    def get_drop_down_headers(view_panel):
+    def get_drop_down_headers(view_panel: WebElement) -> List[str]:
         drop_down_heading = view_panel.find_elements(By.CLASS_NAME, "panel-heading")    # find all heading objs
 
         drop_down_heading_text = [heading.text for heading in drop_down_heading]  # extract the heading text
         return drop_down_heading_text
 
-    def extract_view_drop_down_data(self, drop_down_headers, view_panel):
+    def extract_view_drop_down_data(self, drop_down_headers: List[str], view_panel: WebElement) -> Dict:
         views_data = {}
-        count = 1
 
         clickable_headers = [view_panel.find_element(By.LINK_TEXT, header) for header in drop_down_headers]
         for clickable_header in clickable_headers:
@@ -110,17 +120,17 @@ class MHScrapper:
                 data = self.get_contacts()
             elif clickable_header_text == "status":
                 data = self.get_status()
-            elif clickable_header.text == "services":
+            '''elif clickable_header.text == "services":
                 data = self.get_services()
             elif clickable_header.text == "personnel":
-                data = self.get_personnel()
+                data = self.get_personnel()'''
 
             views_data[clickable_header_text] = data
 
         return views_data
 
     @staticmethod
-    def get_identifiers(view_panel):
+    def get_identifiers(view_panel: WebElement) -> dict[str, str]:
         facility_code = view_panel.find_element(By.ID, "unique_id").text
         state_unique_id = view_panel.find_element(By.ID, "state_unique_id").text
         registration_no = view_panel.find_element(By.ID, "registration_no").text
@@ -145,7 +155,7 @@ class MHScrapper:
         return data
 
     @staticmethod
-    def get_location(view_panel):
+    def get_location(view_panel: WebElement) -> dict[str, str]:
         state = view_panel.find_element(By.ID, "state").text
         lga = view_panel.find_element(By.ID, "lga").text
         ward = view_panel.find_element(By.ID, "ward").text
@@ -161,7 +171,7 @@ class MHScrapper:
         return data
 
     @staticmethod
-    def get_contacts(view_panel):
+    def get_contacts(view_panel: WebElement) -> dict[str, str]:
         phone_number = view_panel.find_element(By.ID, "phone_number").text
         alternate_number = view_panel.find_element(By.ID, "alternate_number").text
         email_address = view_panel.find_element(By.ID, "email_address").text
@@ -174,7 +184,7 @@ class MHScrapper:
         return data
 
     @staticmethod
-    def get_status(view_panel):
+    def get_status(view_panel: WebElement) -> dict[str, str]:
         operation_status = view_panel.find_element(By.ID, "operation_status").text
         registration_status = view_panel.find_element(By.ID, "registration_status").text
         license_status = view_panel.find_element(By.ID, "license_status").text
@@ -186,25 +196,26 @@ class MHScrapper:
 
         return data
 
-    @staticmethod
+    ''' @staticmethod
     def get_services(view_panel):
-        
-
-
-    @staticmethod
-    def get_personnel(view_panel):
         pass
 
+
     @staticmethod
-    def close_view_panel(view_button):
+    def get_personnel(view_panel) :
+        pass'''
+
+    @staticmethod
+    def close_view_panel(view_button: WebElement) -> None:
         view_button.send_keys(Keys.ESCAPE)
 
-    def get_next_page(self):
+    def get_next_page(self) -> bool:
         pagination = self.driver.find_element(By.CLASS_NAME, "pagination")
         try:
             next_page = pagination.find_element(By.LINK_TEXT, '›')
             next_page.click()
             self.page += 1
+            return True
         except NoSuchElementException:
             self.logger.info("End of Health Ministry data pages")
             return False
