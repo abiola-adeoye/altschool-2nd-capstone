@@ -162,11 +162,61 @@ class MHScrapper:
 
     @staticmethod
     def get_services(view_panel):
-        pass
+        outpatient_service = view_panel.find_element(By.ID, 'outpatient').text
+        inpatient_service = view_panel.find_element(By.ID, 'inpatient').text
+        medical_service = view_panel.find_element(By.ID, 'medical').text
+        surgical_service = view_panel.find_element(By.ID, 'surgical').text
+        gynecology_service = view_panel.find_element(By.ID, 'gyn').text
+        pediatrics_service = view_panel.find_element(By.ID, 'pediatrics').text
+        dental_service = view_panel.find_element(By.ID, 'dental').text
+        special_service = view_panel.find_element(By.ID, 'specialservice').text
+        tot_num_beds = view_panel.find_element(By.ID, 'beds').text
+        onsite_laboratory = view_panel.find_element(By.ID, 'onsite_laboratory').text
+        onsite_imaging = view_panel.find_element(By.ID, 'onsite_imaging').text
+        onsite_pharmarcy = view_panel.find_element(By.ID, 'onsite_pharmarcy').text
+        mortuary_services = view_panel.find_element(By.ID, 'mortuary_services').text
+        ambulance_services = view_panel.find_element(By.ID, 'ambulance_services').text
+
+
+        data = {"outpatient_service":outpatient_service,"ambulance_services":ambulance_services,"mortuary_services":mortuary_services,
+                "onsite_imaging":onsite_imaging,"onsite_pharmarcy":onsite_pharmarcy,"onsite_laboratory":onsite_laboratory,
+                "tot_num_beds":tot_num_beds,"special_service":special_service,"dental_service":dental_service,
+                "pediatrics_service":pediatrics_service, "gynecology_service":gynecology_service, "surgical_service":surgical_service,
+                "medical_service":medical_service,"inpatient_service":inpatient_service}
+
+        return data
+
 
     @staticmethod
     def get_personnel(view_panel):
-        pass
+        num_of_docs = view_panel.find_element(By.ID, 'doctors').text
+        num_of_pharms = view_panel.find_element(By.ID, 'pharmacists').text
+        num_of_pharm_technicians = view_panel.find_element(By.ID, 'pharmacy_technicians').text
+        num_of_dentists = view_panel.find_element(By.ID, 'dentist').text
+        num_of_dental_technicians = view_panel.find_element(By.ID, 'dental_technicians').text
+        num_of_nurses = view_panel.find_element(By.ID, 'nurses').text
+        num_of_midwifes = view_panel.find_element(By.ID, 'midwifes').text
+        num_of_nurse_midwife = view_panel.find_element(By.ID, 'nurse_midwife').text
+        num_of_lab_technicians = view_panel.find_element(By.ID, 'lab_technicians').text
+        num_of_lab_scientists = view_panel.find_element(By.ID, 'lab_scientists').text
+        num_of_him_officers = view_panel.find_element(By.ID, 'him_officers').text
+        num_of_community_health_officer = view_panel.find_element(By.ID, 'community_health_officer').text
+        num_of_community_extension_workers = view_panel.find_element(By.ID, 'community_extension_workers').text
+        num_of_jun_community_extension_worker = view_panel.find_element(By.ID, 'jun_community_extension_worker').text
+        num_of_env_health_officers = view_panel.find_element(By.ID, 'env_health_officers').text
+        num_of_health_attendants = view_panel.find_element(By.ID, 'attendants').text
+
+        data = {"num_of_docs":num_of_docs,"num_of_pharms": num_of_pharms,"num_of_midwifes": num_of_midwifes,
+                "num_of_nurses":num_of_nurses, "num_of_nurse_midwife":num_of_nurse_midwife,
+                "num_of_pharm_technicians":num_of_pharm_technicians,"num_of_dentists":num_of_dentists,
+                "num_of_health_attendants":num_of_health_attendants,"num_of_env_health_officers": num_of_env_health_officers,
+                "num_of_him_officers":num_of_him_officers,"num_of_community_health_officer":num_of_community_health_officer,
+                "num_of_jun_community_extension_worker":num_of_jun_community_extension_worker,
+                "num_of_community_extension_workers":num_of_community_extension_workers,"num_of_dental_technicians":num_of_dental_technicians,
+                "num_of_lab_technicians":num_of_lab_technicians,"num_of_lab_scientists":num_of_lab_scientists}
+
+        return data
+
 
     @staticmethod
     def close_view_panel(view_button):
