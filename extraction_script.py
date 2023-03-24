@@ -7,6 +7,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 
 
 class MHScrapper:
@@ -15,22 +18,25 @@ class MHScrapper:
         self.logger = load_logging(__name__)
         self.page = 1
         self.test = test
+        options = Options()
+        options.headless = True
 
         try:
             self.logger.info(f"Ministry of Health data scrapping has started...")
-            self.driver = webdriver.Chrome()
+            self.driver = webdriver.Chrome(options=options)
             self.driver.get(health_data_website)
-            self.driver.implicitly_wait(3)
+            self.driver.implicitly_wait(5)
         except Exception:
             self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
 
     def scrape_mh_data(self):
         rows = []
+        views = []
 
         while True:
             page_table = self.get_page_table()
             if self.page <= 1:
-                header = self.get_table_headers(page_table)     #extract headers once as they don't change
+                header = self.get_table_headers(page_table)     # extract headers once as they don't change
 
             # extracts all row data of current page
             page_body = self.get_table_body(page_table)
@@ -40,16 +46,16 @@ class MHScrapper:
             # click each view button one by one and extract data then close
             view_buttons = self.get_page_view_buttons(page_body)
             view_button_data = self.click_extract_view_buttons_data(view_buttons)
-
+            views.append(view_button_data)
 
             # move to next page and check if we're at final page
             page_bool = self.get_next_page()
             if page_bool is False:
                 break
             if self.test is True:   # for testing purposes only scrapes 10 pages worth of data
-                if self.page == 10:
+                if self.page == 3:
                     break
-        return {"header":header, "rows":rows}
+        return {"header": header, "rows": rows, "views": views}
 
     def get_page_table(self) -> WebElement | None:
         try:
@@ -59,7 +65,6 @@ class MHScrapper:
         except Exception:
             self.logger.error(f"An error occurred getting table tag element for page {self.page}", exc_info=True)
             return None
-
 
     @staticmethod
     def get_table_headers(page_table: WebElement) -> List[str]:
@@ -81,19 +86,28 @@ class MHScrapper:
         return table_data_values
 
     @staticmethod
-    def get_page_view_buttons(table_body: WebElement) -> WebElement:
+    def get_page_view_buttons(table_body: WebElement) -> list[WebElement]:
         buttons = table_body.find_elements(By.LINK_TEXT, "View")
         return buttons
 
-    def click_extract_view_buttons_data(self, buttons: WebElement) -> list[dict]:
+    def click_extract_view_buttons_data(self, buttons: list[WebElement]) -> list[dict]:
         page_view_buttons_data = []
+        count = 1
         for button in buttons:
+            print(count)
+
             button.click()
+            self.driver.implicitly_wait(2)
+
             view_panel = self.driver.find_element(By.CLASS_NAME, "panel-group")
             view_headers = self.get_drop_down_headers(view_panel)
             view_data = self.extract_view_drop_down_data(view_headers, view_panel)
 
-            self.close_view_panel()
+            self.close_view_panel()   # close the current view button
+            self.driver.implicitly_wait(2)
+
+            count += 1
+
 
             page_view_buttons_data.append(view_data)
         return page_view_buttons_data
@@ -107,24 +121,24 @@ class MHScrapper:
 
     def extract_view_drop_down_data(self, drop_down_headers: List[str], view_panel: WebElement) -> Dict:
         views_data = {}
-
         clickable_headers = [view_panel.find_element(By.LINK_TEXT, header) for header in drop_down_headers]
         for clickable_header in clickable_headers:
             clickable_header.click()
             clickable_header_text = clickable_header.text.lower()
             if clickable_header_text == "identifiers":
-                data = self.get_identifiers()
+                data = self.get_identifiers(view_panel)
             elif clickable_header_text == "location":
-                data = self.get_location()
+                data = self.get_location(view_panel)
             elif clickable_header_text == "contacts":
-                data = self.get_contacts()
+                data = self.get_contacts(view_panel)
             elif clickable_header_text == "status":
-                data = self.get_status()
-            '''elif clickable_header.text == "services":
-                data = self.get_services()
+                data = self.get_status(view_panel)
+            elif clickable_header.text == "services":
+                data = self.get_services(view_panel)
             elif clickable_header.text == "personnel":
-                data = self.get_personnel()'''
+                data = self.get_personnel(view_panel)
 
+            #self.close_view_panel(view_panel)
             views_data[clickable_header_text] = data
 
         return views_data
@@ -149,8 +163,8 @@ class MHScrapper:
             "registration_no": registration_no, "facility_name": facility_name,
             "alternate_name": alternate_name, "start_date": start_date,
             "ownership": ownership, "ownership_type": ownership_type,
-            "facility_level": facility_level,"facility_level_option":facility_level_option,
-            "days_of_operation":days_of_operation, "hours_of_operation": hours_of_operation
+            "facility_level": facility_level, "facility_level_option": facility_level_option,
+            "days_of_operation": days_of_operation, "hours_of_operation": hours_of_operation
         }
         return data
 
@@ -213,17 +227,15 @@ class MHScrapper:
         mortuary_services = view_panel.find_element(By.ID, 'mortuary_services').text
         ambulance_services = view_panel.find_element(By.ID, 'ambulance_services').text
 
-
-        data = {"outpatient_service":outpatient_service, "ambulance_services":ambulance_services,
-                "mortuary_services":mortuary_services, "onsite_imaging":onsite_imaging,
-                "onsite_pharmarcy":onsite_pharmarcy,"onsite_laboratory":onsite_laboratory,
-                "tot_num_beds":tot_num_beds,"special_service":special_service,
-                "dental_service":dental_service, "pediatrics_service":pediatrics_service,
-                "gynecology_service":gynecology_service, "surgical_service":surgical_service,
-                "medical_service":medical_service,"inpatient_service":inpatient_service}
+        data = {"outpatient_service": outpatient_service, "ambulance_services": ambulance_services,
+                "mortuary_services": mortuary_services, "onsite_imaging": onsite_imaging,
+                "onsite_pharmarcy": onsite_pharmarcy, "onsite_laboratory": onsite_laboratory,
+                "tot_num_beds": tot_num_beds, "special_service": special_service,
+                "dental_service": dental_service, "pediatrics_service": pediatrics_service,
+                "gynecology_service": gynecology_service, "surgical_service": surgical_service,
+                "medical_service": medical_service, "inpatient_service": inpatient_service}
 
         return data
-
 
     @staticmethod
     def get_personnel(view_panel):
@@ -244,23 +256,24 @@ class MHScrapper:
         num_of_env_health_officers = view_panel.find_element(By.ID, 'env_health_officers').text
         num_of_health_attendants = view_panel.find_element(By.ID, 'attendants').text
 
-        data = {"num_of_docs":num_of_docs, "num_of_pharms": num_of_pharms,
-                "num_of_midwifes": num_of_midwifes, "num_of_nurses":num_of_nurses,
-                "num_of_nurse_midwife":num_of_nurse_midwife, "num_of_pharm_technicians":num_of_pharm_technicians,
-                "num_of_dentists":num_of_dentists, "num_of_health_attendants":num_of_health_attendants,
-                "num_of_env_health_officers": num_of_env_health_officers, "num_of_him_officers":num_of_him_officers,
-                "num_of_community_health_officer":num_of_community_health_officer,
-                "num_of_jun_community_extension_worker":num_of_jun_community_extension_worker,
-                "num_of_community_extension_workers":num_of_community_extension_workers,
-                "num_of_dental_technicians":num_of_dental_technicians,
-                "num_of_lab_technicians":num_of_lab_technicians,
-                "num_of_lab_scientists":num_of_lab_scientists}
+        data = {"num_of_docs": num_of_docs, "num_of_pharms": num_of_pharms,
+                "num_of_midwifes": num_of_midwifes, "num_of_nurses": num_of_nurses,
+                "num_of_nurse_midwife": num_of_nurse_midwife, "num_of_pharm_technicians": num_of_pharm_technicians,
+                "num_of_dentists": num_of_dentists, "num_of_health_attendants": num_of_health_attendants,
+                "num_of_env_health_officers": num_of_env_health_officers, "num_of_him_officers": num_of_him_officers,
+                "num_of_community_health_officer": num_of_community_health_officer,
+                "num_of_jun_community_extension_worker": num_of_jun_community_extension_worker,
+                "num_of_community_extension_workers": num_of_community_extension_workers,
+                "num_of_dental_technicians": num_of_dental_technicians,
+                "num_of_lab_technicians": num_of_lab_technicians,
+                "num_of_lab_scientists": num_of_lab_scientists}
 
         return data
 
-    @staticmethod
-    def close_view_panel(view_button: WebElement) -> None:
-        view_button.send_keys(Keys.ESCAPE)
+    def close_view_panel(self) -> None:
+        views_footer = self.driver.find_element(By.CLASS_NAME, "modal-footer")
+        close_button = views_footer.find_element(By.TAG_NAME, "button")
+        close_button.send_keys(Keys.ESCAPE)
 
     def get_next_page(self) -> bool:
         pagination = self.driver.find_element(By.CLASS_NAME, "pagination")

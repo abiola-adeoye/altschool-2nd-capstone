@@ -11,4 +11,8 @@ website = "https://hfr.health.gov.ng/facilities/hospitals-search?_token=uHw9x4DL
 data = MHScrapper(website)
 result = data.scrape_mh_data()
 
-print(result)
+for row in result['rows']:
+    print(row)
+
+for view in result['views']:
+    print(view)
