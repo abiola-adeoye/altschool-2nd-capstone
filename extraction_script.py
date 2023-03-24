@@ -121,7 +121,32 @@ class MHScrapper:
 
     @staticmethod
     def get_identifiers(view_panel):
-        pass
+        facility_code = view_panel.find_element(By.ID, "unique_id").text
+        state_unique_id = view_panel.find_element(By.ID, "state_unique_id").text
+        registration_no = view_panel.find_element(By.ID, "registration_no").text
+        facility_name = view_panel.find_element(By.ID, "facility_name").text
+        alternate_name = view_panel.find_element(By.ID, "alt_facility_name").text
+        start_date = view_panel.find_element(By.ID, "start_date").text
+        ownership = view_panel.find_element(By.ID, "ownership").text
+        ownership_type = view_panel.find_element(By.ID, "ownership_type").text
+        facility_level = view_panel.find_element(By.ID, "facility_level").text
+        facility_level_option = view_panel.find_element(By.ID, "facility_level_option").text
+        days_of_operation = view_panel.find_element(By.ID, "operational_days").text
+        hours_of_operation = view_panel.find_element(By.ID, "operational_hours").text
+
+        data = {
+            "facility_code": facility_code, "state_unique_id": state_unique_id,
+            "registration_no": registration_no, "facility_name": facility_name,
+            "alternate_name": alternate_name, "start_date": start_date,
+            "ownership": ownership, "ownership_type": ownership_type,
+            "facility_level": facility_level,"facility_level_option":facility_level_option,
+            "days_of_operation":days_of_operation, "hours_of_operation": hours_of_operation
+        }
+        return data
+
+
+
+
 
     @staticmethod
     def get_location(view_panel):
@@ -144,8 +169,8 @@ class MHScrapper:
         pass
 
     @staticmethod
-    def close_view_panel(view_panel):
-        view_panel.send_keys(Keys.ESCAPE)
+    def close_view_panel(view_button):
+        view_button.send_keys(Keys.ESCAPE)
 
     def get_next_page(self):
         pagination = self.driver.find_element(By.CLASS_NAME, "pagination")
