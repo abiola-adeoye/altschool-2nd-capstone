@@ -144,25 +144,52 @@ class MHScrapper:
         }
         return data
 
-
-
-
-
     @staticmethod
     def get_location(view_panel):
-        pass
+        state = view_panel.find_element(By.ID, "state").text
+        lga = view_panel.find_element(By.ID, "lga").text
+        ward = view_panel.find_element(By.ID, "ward").text
+        physical_location = view_panel.find_element(By.ID, "physical_location").text
+        postal_address = view_panel.find_element(By.ID, "postal_address").text
+        longitude = view_panel.find_element(By.ID, "longitude").text
+        latitude = view_panel.find_element(By.ID, "latitude").text
+
+        data = {
+            "state": state, "lga": lga, "ward": ward, "physical_location": physical_location,
+            "postal_address": postal_address, "longitude": longitude, "latitude": latitude
+        }
+        return data
 
     @staticmethod
     def get_contacts(view_panel):
-        pass
+        phone_number = view_panel.find_element(By.ID, "phone_number").text
+        alternate_number = view_panel.find_element(By.ID, "alternate_number").text
+        email_address = view_panel.find_element(By.ID, "email_address").text
+        website = view_panel.find_element(By.ID, "website").text
+
+        data = {
+            "phone_number": phone_number, "alternate_number": alternate_number,
+            "email_address": email_address, "website": website
+        }
+        return data
 
     @staticmethod
     def get_status(view_panel):
-        pass
+        operation_status = view_panel.find_element(By.ID, "operation_status").text
+        registration_status = view_panel.find_element(By.ID, "registration_status").text
+        license_status = view_panel.find_element(By.ID, "license_status").text
+
+        data = {
+            "operation_status": operation_status, "registration_status": registration_status,
+            "license_status": license_status
+        }
+
+        return data
 
     @staticmethod
     def get_services(view_panel):
-        pass
+        
+
 
     @staticmethod
     def get_personnel(view_panel):
