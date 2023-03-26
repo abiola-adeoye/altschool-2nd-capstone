@@ -26,16 +26,13 @@ class MHScrapper:
 
         self.page = 1       # current_page
         self.test = test
-        options = Options()
         if self.test is True:
             try:
 
                 self.logger.info(f"Ministry of Health data scrapping has started...")
-                options.headless = True
 
-                self.driver = webdriver.Chrome(options=options)
+                self.driver = webdriver.Chrome()
                 self.driver.get(health_data_website)
-
 
             except Exception:
                 self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
@@ -43,6 +40,9 @@ class MHScrapper:
         else:
             try:
                 self.logger.info(f"Ministry of Health data scrapping has started...")
+
+                options = Options()
+                options.headless = True
 
                 self.driver = webdriver.Chrome(options=options)
                 self.driver.get(health_data_website)
