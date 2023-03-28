@@ -1,3 +1,5 @@
+import time
+
 from typing import List, Dict, Any
 
 from log import load_logging
@@ -66,6 +68,7 @@ class MHScrapper:
 
             # move to next page and check if we're at final page
             page_bool = self.get_next_page()
+            #time.sleep(2)   # important don't delete
             if page_bool is False:
                 break
 
@@ -102,9 +105,9 @@ class MHScrapper:
         for button in buttons:
             try:
                 self.logger.info(f"page:{self.page}, row:{row_num}")
-
                 self.extract_data(button)
                 row_num += 1
+
             except Exception:
                 self.logger.error(f"issue extracting data for page:{self.page}, row:{row_num}")
 
