@@ -1,5 +1,3 @@
-import time
-
 from typing import List, Dict, Any
 
 from log import load_logging
