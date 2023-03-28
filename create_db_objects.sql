@@ -70,7 +70,8 @@ ward VARCHAR(255),
 physical_location VARCHAR(255),
 postal_address VARCHAR(255),
 longitude NUMERIC(5,2),
-latitude  NUMERIC(5,2)
+latitude  NUMERIC(5,2),
+region VARCHAR(255)
 
 );
 CREATE table capstone2.contacts (
