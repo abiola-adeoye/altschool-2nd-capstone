@@ -61,7 +61,7 @@ class MHScrapper:
             self.extract_view_buttons_data(view_buttons)
 
             if self.test is True:   # for testing purposes only scrapes 10 pages worth of data
-                if self.page == 10:
+                if self.page == 1:
                     break
 
             # move to next page and check if we're at final page

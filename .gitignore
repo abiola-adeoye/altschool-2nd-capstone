@@ -11,3 +11,7 @@ __pycache__/
 geckodriver.log
 
 extraction_script.log
+
+.ipynb_checkpoints
+
+Untitled.ipynb
