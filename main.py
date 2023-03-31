@@ -20,7 +20,7 @@ engine = create_engine("postgresql://" + user + ":" +
                        password + "@" + host + ":" + str(port) + "/" + db)
 
 
-website = "https://hfr.health.gov.ng/facilities/hospitals-search?_token=46DimSGFwpf0Hz6fkdg4kceauIDPrSjFNh6FiWMN&state_id=1&lga_id=1&ward_id=0&facility_level_id=0&ownership_id=0&operational_status_id=0&registration_status_id=0&license_status_id=0&geo_codes=0&service_type=0&service_category_id=0&facility_name=&entries_per_page=20"
+website = "https://hfr.health.gov.ng/facilities/hospitals-search?_token=46DimSGFwpf0Hz6fkdg4kceauIDPrSjFNh6FiWMN&state_id=1&lga_id=1&ward_id=0&facility_level_id=0&ownership_id=0&operational_status_id=0&registration_status_id=0&license_status_id=0&geo_codes=0&service_type=0&service_category_id=0&facility_name=&entries_per_page=100"
 data = MHScrapper(website)
 result = data.scrape_mh_data()
 file_path = "C:/Users/HP/Documents/"     # change this to the directory you want to save to
