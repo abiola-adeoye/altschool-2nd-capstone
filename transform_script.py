@@ -26,7 +26,7 @@ dtype_locations ={
 }
 
 dtype_pages = {
-    'state': str, 'lga': str, 'ward': str, 'facility_uid': int,
+    'state': str, 'lga': str, 'ward': str, 'facility_uid': str,
     'facility_code': str, 'facility_name': str, 'facility_level': str, 'ownership': str
 }
 
