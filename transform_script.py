@@ -50,7 +50,7 @@ dtype_services = {
     "outpatient_service": str, "ambulance_services": str,
     "mortuary_services": str, "onsite_imaging": str,
     "onsite_pharmarcy": str, "onsite_laboratory": str,
-    "tot_num_beds": int, "special_service": str,
+    "tot_num_beds": str, "special_service": str,
     "dental_service": str, "pediatrics_service": str,
     "gynecology_service": str, "surgical_service": str,
     "medical_service": str, "inpatient_service": str
@@ -65,25 +65,23 @@ dtype_status = {
 
 
 def clean_load_page_rows(file_path, dtype_dict, engine):
-    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict)
-    file_df.fillna(0, inplace=True)
-    file_df.start_date.dropna(inplace=True)
-    file_df.to_sql(name='contacts', con=engine, if_exists='append', index=False)
+    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict, sep=";")
+    file_df.fillna("", inplace=True)
+    file_df.to_sql(name='page_rows', con=engine, if_exists='append', index=False)
 
 
 def clean_load_identifiers(file_path, dtype_dict, engine):
-    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict)
-    file_df.fillna(0, inplace=True)
+    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict, sep=";")
     file_df.start_date.dropna(inplace=True)
     file_df['start_date'] = file_df['start_date'].apply(lambda x: str(x).strip())
     file_df = file_df[ file_df['start_date'] != 'nan']  # remove nan rows
     file_df['start_date'] = file_df['start_date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
-    file_df.to_sql(name='contacts', con=engine, if_exists='append', index=False)
+    file_df.to_sql(name='identifiers', con=engine, if_exists='append', index=False)
 
 
-def clean_load_locations(file_path, dtype_dict):
-    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict)
-    file_df.fillna(0, inplace=True)
+def clean_load_locations(file_path, dtype_dict, engine):
+    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict, sep=";")
+    file_df.fillna("", inplace=True)
     file_df.drop_duplicates(inplace=True)
     file_df['longitude'] = file_df['longitude'].apply(lambda x: str(x))
     file_df['latitude'] = file_df['latitude'].apply(lambda x: str(x))
@@ -94,35 +92,36 @@ def clean_load_locations(file_path, dtype_dict):
     file_df = file_df[file_df['latitude'] != 'nan']
     file_df = file_df[file_df['latitude'] != '']
     file_df['Region'] = file_df['state'].apply(get_region)
-    file_df.to_sql(name='contacts', con=engine, if_exists='append', index=False)
+    file_df.to_sql(name='locations', con=engine, if_exists='append', index=False)
 
 
 def clean_load_contacts(file_path, dtype_dict, engine):
-    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict)
-    file_df.fillna(0, inplace=True)
+    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict, sep=";")
+    file_df.fillna("", inplace=True)
     file_df.drop_duplicates(inplace=True)
     file_df.replace("00__-___-____", 0, inplace=True)
     file_df.to_sql(name='contacts', con=engine, if_exists='append', index=False)
 
 
 def clean_load_status(file_path, dtype_dict, engine):
-    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict)
-    file_df.fillna(0, inplace=True)
+    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict, sep=";")
+    file_df.fillna("", inplace=True)
     file_df.drop_duplicates(inplace=True)
-    file_df.to_sql(name='contacts', con=engine, if_exists='append', index=False)
+    file_df.to_sql(name='status', con=engine, if_exists='append', index=False)
 
 
 def clean_load_services(file_path, dtype_dict, engine):
-    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict)
-    file_df.fillna(0, inplace=True)
-    file_df.to_sql(name='contacts', con=engine, if_exists='append', index=False)
+    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict, sep=";")
+    file_df['tot_num_beds'] = pd.to_numeric(file_df['tot_num_beds'])
+    file_df['tot_num_beds'].fillna(0)
+    file_df.to_sql(name='services', con=engine, if_exists='append', index=False)
 
 
 def clean_load_personnel(file_path, dtype_dict, engine):
-    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict)
+    file_df = pd.read_csv(file_path, usecols=dtype_dict.keys(), dtype=dtype_dict, sep=";")
     file_df.fillna(0, inplace=True)
-    file_df.to_sql(name='contacts', con=engine, if_exists='append', index=False)
-
+    file_df = file_df.astype(int)
+    file_df.to_sql(name='personnel', con=engine, if_exists='append', index=False)
 
 
 def get_region(state):
