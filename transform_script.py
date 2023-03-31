@@ -91,6 +91,10 @@ def clean_load_locations(file_path, dtype_dict, engine):
     file_df = file_df[file_df['longitude'] != 'nan']
     file_df = file_df[file_df['latitude'] != 'nan']
     file_df = file_df[file_df['latitude'] != '']
+
+    file_df['longitude'] = pd.to_numeric(file_df['longitude'])
+    file_df['latitude'] = pd.to_numeric(file_df['latitude'])
+
     file_df['Region'] = file_df['state'].apply(get_region)
     file_df.to_sql(name='locations', con=engine, if_exists='append', index=False)
 
