@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-from log import load_logging
+from src.log import load_logging
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -24,7 +24,7 @@ class MHScrapper:
         self.services = []
         self.personnel = []
 
-        self.page = 1       # current_page
+        self.current_page = 1       # current_page
         self.test = test
         if self.test is True:
             try:
@@ -61,7 +61,7 @@ class MHScrapper:
             self.extract_view_buttons_data(view_buttons)
 
             if self.test is True:   # for testing purposes only scrapes 10 pages worth of data
-                if self.page == 1:
+                if self.current_page == 2:
                     break
 
             # move to next page and check if we're at final page
@@ -81,11 +81,11 @@ class MHScrapper:
         try:
 
             page_table = self.driver.find_element(By.ID, "hosp")
-            self.logger.info(f"getting table tag element for page {self.page}")
+            self.logger.info(f"getting table tag element for page {self.current_page}")
             return page_table
 
         except Exception:
-            self.logger.error(f"An error occurred getting table tag element for page {self.page}", exc_info=True)
+            self.logger.error(f"An error occurred getting table tag element for page {self.current_page}", exc_info=True)
             return None
 
     @staticmethod
@@ -102,12 +102,12 @@ class MHScrapper:
         row_num = 1
         for button in buttons:
             try:
-                self.logger.info(f"page:{self.page}, row:{row_num}")
+                self.logger.info(f"page:{self.current_page}, row:{row_num}")
                 self.extract_data(button)
                 row_num += 1
 
             except Exception:
-                self.logger.error(f"issue extracting data for page:{self.page}, row:{row_num}")
+                self.logger.error(f"issue extracting data for page:{self.current_page}, row:{row_num}")
 
     def extract_data(self, button_elem: WebElement):
         self.get_page_rows(button_elem)
@@ -124,7 +124,7 @@ class MHScrapper:
             next_page = pagination.find_element(By.LINK_TEXT, '›')
 
             next_page.click()
-            self.page += 1
+            self.current_page += 1
             return True
         except NoSuchElementException:
             self.logger.info("End of Health Ministry data pages")
