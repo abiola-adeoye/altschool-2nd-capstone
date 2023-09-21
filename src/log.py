@@ -1,3 +1,4 @@
+import os
 import logging
 
 
@@ -9,11 +10,14 @@ def load_logging(name):
     # create logging format
     log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    # create handlers
-    # log_file_path = os.path.abspath("log_records/") tried specifying directory to save log files wasn't successful.
+    # check log file path, create if not exist
+    log_file_path = os.path.abspath("log_records/")
+    if not os.path.exists(log_file_path):
+        os.makedirs(log_file_path)
 
+    # create handlers
     console_handler = logging.StreamHandler()
-    file_handler = logging.FileHandler("{name}.log".format(name=name))
+    file_handler = logging.FileHandler(f"{log_file_path}/{name}.log")
 
     # setting the format the log records will be saved
     console_handler.setFormatter(log_format)

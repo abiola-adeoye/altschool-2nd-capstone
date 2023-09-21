@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-from log import load_logging
+from .log import load_logging
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -13,7 +13,7 @@ from selenium.webdriver.chrome.options import Options
 class MHScrapper:
     def __init__(self, health_data_website, test=True):
         # load logger
-        self.logger = load_logging(__name__)
+        self.logger = load_logging(__class__.__name__)
 
         # create empty list to store an array of dicts for each table
         self.page_rows = []
@@ -24,52 +24,44 @@ class MHScrapper:
         self.services = []
         self.personnel = []
 
-        self.page = 1       # current_page
-        self.test = test
-        if self.test is True:
+        self.current_page = 1       # current_page
+        if test is True:
             try:
-
-                self.logger.info(f"Ministry of Health data scrapping has started...")
-
+                self.logger.info(f"Ministry of Health data scrapping has started test mode...")
                 self.driver = webdriver.Chrome()
                 self.driver.get(health_data_website)
-
             except Exception:
                 self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
-
         else:
             try:
                 self.logger.info(f"Ministry of Health data scrapping has started...")
-
                 options = Options()
                 options.headless = True
 
                 self.driver = webdriver.Chrome(options=options)
                 self.driver.get(health_data_website)
-
             except Exception:
                 self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
 
     def scrape_mh_data(self) -> Dict[str, List[Any]]:
         while True:
-            page_table = self.get_page_table()
-            page_body = self.get_table_body(page_table)
+            try:
+                page_table = self.get_page_table()
+                page_body = self.get_table_body(page_table)
+                # get all view button along with their associated attributes
+                view_buttons = self.get_page_view_buttons(page_body)
+                self.extract_view_buttons_data(view_buttons)
 
-            # get all view button along with their associated attributes
-            view_buttons = self.get_page_view_buttons(page_body)
+                if (self.test is True) and (self.current_page == 1):   # for testing purposes
+                    break   # break when current page extracting for matches the number in if statement
 
-            self.extract_view_buttons_data(view_buttons)
-
-            if self.test is True:   # for testing purposes only scrapes 10 pages worth of data
-                if self.page == 1:
+                # move to next page and check if we're at the final page
+                page_bool = self.get_next_page()
+                #time.sleep(2)   # important don't delete
+                if page_bool is False:
                     break
-
-            # move to next page and check if we're at final page
-            page_bool = self.get_next_page()
-            #time.sleep(2)   # important don't delete
-            if page_bool is False:
-                break
-
+            except Exception:
+                self.logger.error(f"An error occurred while scraping the data", exc_info=True)
         full_data = {
             "page_rows": self.page_rows, "identifiers": self.identifiers, "locations": self.locations,
             "contacts": self.contacts, "status": self.status, "services": self.services, "personnel": self.personnel
@@ -79,13 +71,11 @@ class MHScrapper:
 
     def get_page_table(self) -> WebElement | None:
         try:
-
             page_table = self.driver.find_element(By.ID, "hosp")
-            self.logger.info(f"getting table tag element for page {self.page}")
+            self.logger.info(f"getting table tag element for page {self.current_page}")
             return page_table
-
         except Exception:
-            self.logger.error(f"An error occurred getting table tag element for page {self.page}", exc_info=True)
+            self.logger.error(f"An error occurred getting table tag element for page {self.current_page}", exc_info=True)
             return None
 
     @staticmethod
@@ -102,12 +92,12 @@ class MHScrapper:
         row_num = 1
         for button in buttons:
             try:
-                self.logger.info(f"page:{self.page}, row:{row_num}")
+                self.logger.info(f"page:{self.current_page}, row:{row_num}")
                 self.extract_data(button)
                 row_num += 1
 
             except Exception:
-                self.logger.error(f"issue extracting data for page:{self.page}, row:{row_num}")
+                self.logger.error(f"issue extracting data for page:{self.current_page}, row:{row_num}")
 
     def extract_data(self, button_elem: WebElement):
         self.get_page_rows(button_elem)
@@ -124,7 +114,7 @@ class MHScrapper:
             next_page = pagination.find_element(By.LINK_TEXT, '›')
 
             next_page.click()
-            self.page += 1
+            self.current_page += 1
             return True
         except NoSuchElementException:
             self.logger.info("End of Health Ministry data pages")
