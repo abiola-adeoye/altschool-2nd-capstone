@@ -47,6 +47,7 @@ class MHScrapper:
             try:
                 page_table = self.get_page_table()
                 page_body = self.get_table_body(page_table)
+
                 # get all view button along with their associated attributes
                 view_buttons = self.get_page_view_buttons(page_body)
                 self.extract_view_buttons_data(view_buttons)
@@ -56,7 +57,7 @@ class MHScrapper:
 
                 # move to next page and check if we're at the final page
                 page_bool = self.get_next_page()
-                #time.sleep(2)   # important don't delete
+                # time.sleep(2)   # important don't delete, uncomment the line if it breaks randomly and don't know why
                 if page_bool is False:
                     break
             except Exception:

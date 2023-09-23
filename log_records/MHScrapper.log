@@ -371,3 +371,41 @@ AttributeError: 'MHScrapper' object has no attribute 'test'
 2023-09-23 12:48:46,986 - MHScrapper - INFO - page:20, row:3
 2023-09-23 12:48:47,759 - MHScrapper - INFO - page:20, row:4
 2023-09-23 12:48:48,436 - MHScrapper - INFO - page:20, row:5
+2023-09-23 15:11:09,011 - MHScrapper - INFO - Ministry of Health data scrapping has started test mode...
+2023-09-23 15:11:16,320 - MHScrapper - INFO - getting table tag element for page 18
+2023-09-23 15:11:16,350 - MHScrapper - INFO - page:18, row:1
+2023-09-23 15:11:17,194 - MHScrapper - INFO - page:18, row:2
+2023-09-23 15:11:17,934 - MHScrapper - INFO - page:18, row:3
+2023-09-23 15:11:18,701 - MHScrapper - INFO - page:18, row:4
+2023-09-23 15:11:19,337 - MHScrapper - INFO - page:18, row:5
+2023-09-23 15:11:24,379 - MHScrapper - INFO - getting table tag element for page 19
+2023-09-23 15:11:24,413 - MHScrapper - INFO - page:19, row:1
+2023-09-23 15:11:25,165 - MHScrapper - INFO - page:19, row:2
+2023-09-23 15:11:25,887 - MHScrapper - INFO - page:19, row:3
+2023-09-23 15:11:26,638 - MHScrapper - INFO - page:19, row:4
+2023-09-23 15:11:27,379 - MHScrapper - INFO - page:19, row:5
+2023-09-23 15:11:32,604 - MHScrapper - INFO - getting table tag element for page 20
+2023-09-23 15:11:32,627 - MHScrapper - INFO - page:20, row:1
+2023-09-23 15:11:33,387 - MHScrapper - INFO - page:20, row:2
+2023-09-23 15:11:34,063 - MHScrapper - INFO - page:20, row:3
+2023-09-23 15:11:34,774 - MHScrapper - INFO - page:20, row:4
+2023-09-23 15:11:35,431 - MHScrapper - INFO - page:20, row:5
+2023-09-23 15:12:13,529 - MHScrapper - INFO - Ministry of Health data scrapping has started test mode...
+2023-09-23 15:12:21,049 - MHScrapper - INFO - getting table tag element for page 18
+2023-09-23 15:12:21,082 - MHScrapper - INFO - page:18, row:1
+2023-09-23 15:12:21,977 - MHScrapper - INFO - page:18, row:2
+2023-09-23 15:12:22,733 - MHScrapper - INFO - page:18, row:3
+2023-09-23 15:12:23,445 - MHScrapper - INFO - page:18, row:4
+2023-09-23 15:12:24,127 - MHScrapper - INFO - page:18, row:5
+2023-09-23 15:12:29,278 - MHScrapper - INFO - getting table tag element for page 19
+2023-09-23 15:12:29,309 - MHScrapper - INFO - page:19, row:1
+2023-09-23 15:12:29,990 - MHScrapper - INFO - page:19, row:2
+2023-09-23 15:12:30,731 - MHScrapper - INFO - page:19, row:3
+2023-09-23 15:12:31,486 - MHScrapper - INFO - page:19, row:4
+2023-09-23 15:12:32,243 - MHScrapper - INFO - page:19, row:5
+2023-09-23 15:12:37,479 - MHScrapper - INFO - getting table tag element for page 20
+2023-09-23 15:12:37,498 - MHScrapper - INFO - page:20, row:1
+2023-09-23 15:12:38,240 - MHScrapper - INFO - page:20, row:2
+2023-09-23 15:12:38,972 - MHScrapper - INFO - page:20, row:3
+2023-09-23 15:12:39,725 - MHScrapper - INFO - page:20, row:4
+2023-09-23 15:12:40,426 - MHScrapper - INFO - page:20, row:5
