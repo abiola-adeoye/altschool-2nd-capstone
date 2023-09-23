@@ -8,8 +8,7 @@ from src.extraction_script import MHScrapper
 from sqlalchemy import create_engine
 import pandas as pd
 
-website = "https://hfr.health.gov.ng/facilities/hospitals-search?entries_per_page=100"
-scraper = MHScrapper(website)
+scraper = MHScrapper(start_page=18)
 result = scraper.scrape_mh_data()
 
 # create a temp file path

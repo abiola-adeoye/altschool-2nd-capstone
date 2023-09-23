@@ -1,21 +1,22 @@
 from typing import List, Dict, Any
 
-from .log import load_logging
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.remote.webelement import WebElement
-
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.common.exceptions import NoSuchElementException
+
+from .log import load_logging
 
 
 class MHScrapper:
-    def __init__(self, health_data_website, test=True):
+    mh_website = "https://hfr.health.gov.ng/facilities/hospitals-search?entries_per_page=5"
+
+    def __init__(self, test=True, start_page=1):
         # load logger
         self.logger = load_logging(__class__.__name__)
 
-        # create empty list to store an array of dicts for each table
+        # create empty list to store an array of dicts for each table, this needs to be refactored
         self.page_rows = []
         self.identifiers = []
         self.locations = []
@@ -24,24 +25,22 @@ class MHScrapper:
         self.services = []
         self.personnel = []
 
-        self.current_page = 1       # current_page
-        if test is True:
-            try:
-                self.logger.info(f"Ministry of Health data scrapping has started test mode...")
-                self.driver = webdriver.Chrome()
-                self.driver.get(health_data_website)
-            except Exception:
-                self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
-        else:
-            try:
-                self.logger.info(f"Ministry of Health data scrapping has started...")
-                options = Options()
-                options.headless = True
+        self.current_page = start_page       # current_page
+        self.mh_website += f"&page={start_page}"
+        self.test = test
 
-                self.driver = webdriver.Chrome(options=options)
-                self.driver.get(health_data_website)
-            except Exception:
-                self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
+        if self.test is True:
+            self.logger.info(f"Ministry of Health data scrapping has started test mode...")
+            self.driver = webdriver.Chrome()
+        else:
+            self.logger.info(f"Ministry of Health data scrapping has started...")
+            options = Options()
+            options.headless = True
+            self.driver = webdriver.Chrome(options=options)
+        try:
+            self.driver.get(self.mh_website)
+        except Exception:
+            self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
 
     def scrape_mh_data(self) -> Dict[str, List[Any]]:
         while True:
@@ -52,7 +51,7 @@ class MHScrapper:
                 view_buttons = self.get_page_view_buttons(page_body)
                 self.extract_view_buttons_data(view_buttons)
 
-                if (self.test is True) and (self.current_page == 1):   # for testing purposes
+                if (self.test is True) and (self.current_page % 3 == 2):   # for testing purposes
                     break   # break when current page extracting for matches the number in if statement
 
                 # move to next page and check if we're at the final page
