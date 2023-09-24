@@ -10,9 +10,9 @@ from .log import load_logging
 
 
 class MHScrapper:
-    mh_website = "https://hfr.health.gov.ng/facilities/hospitals-search?entries_per_page=5"
+    mh_website = "https://hfr.health.gov.ng/facilities/hospitals-search?entries_per_page=100"
 
-    def __init__(self, test=True, start_page=1):
+    def __init__(self, test: bool = True, start_page: int = 1, stop_page: int = None):
         # load logger
         self.logger = load_logging(__class__.__name__)
 
@@ -26,6 +26,7 @@ class MHScrapper:
         self.personnel = []
 
         self.current_page = start_page       # current_page
+        self.stop_page = stop_page
         self.mh_website += f"&page={start_page}"
         self.test = test
 
@@ -53,7 +54,12 @@ class MHScrapper:
                 self.extract_view_buttons_data(view_buttons)
 
                 if (self.test is True) and (self.current_page % 3 == 2):   # for testing purposes
+                    self.logger.info("Test conditions have been met, stopping extraction...")
                     break   # break when current page extracting for matches the number in if statement
+
+                if self.stop_page is not None and self.current_page == self.stop_page:
+                    self.logger.info("Stop page conditions have been met, stopping extraction...")
+                    break
 
                 # move to next page and check if we're at the final page
                 page_bool = self.get_next_page()

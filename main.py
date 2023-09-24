@@ -3,20 +3,14 @@ The default mode of the program is to run in test mode, when it does this, it'll
 the browser. When the goal is to scrape all the data on the ministry of health webpage pass in the argument value of
 'False' to the class instance assides the website, this will scrape all the data and hide the web browser display
 '''
-import os.path
-
+from src.gcp_bucket import MHGCPStorage
 from src.extraction_script import MHScrapper
-import json
-import tempfile
-import shutil
 
-scraper = MHScrapper(start_page=18)
+
+scraper = MHScrapper(test=False, start_page=1, stop_page=4)
+gcp_storage = MHGCPStorage('ministry-health-data-proj')
 result = scraper.scrape_mh_data()
-temp_dir = tempfile.mkdtemp(prefix="unclean_data", suffix="")
 
 
 for key, value in result.items():
-    temp_file_path = os.path.join(temp_dir, f"{key}.json")
-    with open(temp_file_path, 'w') as temp_json:
-        json.dump(value, temp_json, indent=1)
-
+    gcp_storage.create_or_append_json_data(key, value)
