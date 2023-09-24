@@ -1,5 +1,3 @@
-from typing import List, Dict, Any
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -10,9 +8,31 @@ from .log import load_logging
 
 
 class MHScrapper:
+    """
+        This is a more detailed description of the class, providing information about its purpose,
+        functionality, and usage.
+
+        Attributes:
+            mh_website (str): A string of the url to the ministry of health website.
+
+        Methods:
+            scrape_mh_data():
+                This is the method to call that has the other methods needed to smoothly scrape the data implemented in.
+        """
     mh_website = "https://hfr.health.gov.ng/facilities/hospitals-search?entries_per_page=100"
 
     def __init__(self, test: bool = True, start_page: int = 1, stop_page: int = None):
+        """
+                Instance of MHScrapper which either run in the test mode (scraping 3 pages of data max).
+                or in the full mode which scrapes either all the pages or pages between given start and stop.
+
+                Args:
+                    test (bool): This is used to determine if the scrapper runs in a test situation or not.
+                    start_page (int): The page we want the scrapper to start from in situations where we don't want
+                    to start from page 1.
+                    stop_page (int): The page we want the scrapper to stop at when not in test mode, used in situations
+                    when we don't want to extract data on all the pages.
+                """
         # load logger
         self.logger = load_logging(__class__.__name__)
 
@@ -43,7 +63,16 @@ class MHScrapper:
         except Exception:
             self.logger.error("An error occurred opening the Ministry of Health webpage", exc_info=True)
 
-    def scrape_mh_data(self) -> Dict[str, List[Any]]:
+    def scrape_mh_data(self) -> dict[str, list[dict]]:
+        """
+                Starts the process of scraping the data from the ministry of health webpage either in test or
+                full mode.
+
+                Returns:
+                    dict[list[dict]]: The information relating to a hospital/clinic with respect of the contacts,
+                    identifiers, location, personnel, service, status, and general info is returned as a dict array
+                    where the name of each specific collection is a key that points to the dict array.
+                """
         while True:
             try:
                 page_table = self.get_page_table()

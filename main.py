@@ -1,8 +1,6 @@
-'''
-The default mode of the program is to run in test mode, when it does this, it'll scrape the data on 3 pages max and display
-the browser. When the goal is to scrape all the data on the ministry of health webpage pass in the argument value of
-'False' to the class instance assides the website, this will scrape all the data and hide the web browser display
-'''
+# The program by default runs in test mode, it'll scrape the data on 3 pages max and push to the gcp bucket
+# When the goal is not to run in test mode, instantiate the MHScrapper class with the arg 'test=False'
+
 from src.gcp_bucket import MHGCPStorage
 from src.extraction_script import MHScrapper
 
